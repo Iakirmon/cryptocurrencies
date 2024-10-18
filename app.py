@@ -1,17 +1,23 @@
+import os
+import base64
+from datetime import datetime, timedelta
+import io
+import matplotlib
+import matplotlib.pyplot as plt
+import requests
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
-import requests
-import matplotlib
-matplotlib.use('Agg')  # Ustawienie backendu Matplotlib na "Agg"
-import matplotlib.pyplot as plt
-import io
-import base64
-from datetime import datetime, timedelta
+
+matplotlib.use('Agg')
+
+# Usuń istniejącą bazę danych
+if os.path.exists('users.db'):
+    os.remove('users.db')
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Ustawienie secret_key
+app.secret_key = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -93,7 +99,6 @@ def dashboard():
 @login_required
 def currencies():
     if request.method == 'POST':
-        # Pobieranie danych z API NBP
         api_url = "http://api.nbp.pl/api/exchangerates/tables/A?format=json"
         response = requests.get(api_url)
         if response.status_code == 200:
@@ -102,7 +107,6 @@ def currencies():
         else:
             top_10_currencies = []
         
-        # Pobieranie danych historycznych dla każdej waluty
         end_date = datetime.now().strftime('%Y-%m-%d')
         start_date = (datetime.now() - timedelta(days=31)).strftime('%Y-%m-%d')
         historical_data = {}
@@ -117,7 +121,6 @@ def currencies():
                 dates = [rate['effectiveDate'] for rate in history['rates']]
                 historical_data[code] = {'rates': rates, 'dates': dates}
 
-                # Zapisanie danych do bazy danych, jeśli nie istnieją
                 for date, rate in zip(dates, rates):
                     existing_rate = CurrencyRate.query.filter_by(code=code, date=date).first()
                     if not existing_rate:
@@ -125,15 +128,13 @@ def currencies():
                         db.session.add(new_rate)
                 db.session.commit()
         
-        # Sortowanie walut według kursu (od najdroższych do najtańszych)
         top_10_currencies.sort(key=lambda x: x['mid'], reverse=True)
 
-        # Generowanie wykresów
         plots = {}
         for currency in top_10_currencies:
             code = currency['code']
             data = historical_data[code]
-            plt.figure(figsize=(5, 3))  # Pomniejszenie wykresów
+            plt.figure(figsize=(5, 3))
             plt.plot(data['dates'], data['rates'], marker='o')
             plt.title(f'{code} to PLN (Last 31 Days)')
             plt.xlabel('Date')
@@ -141,7 +142,6 @@ def currencies():
             plt.xticks(rotation=45)
             plt.tight_layout()
 
-            # Zapisanie wykresu do stringa w formacie base64
             img = io.BytesIO()
             plt.savefig(img, format='png')
             img.seek(0)
@@ -161,38 +161,59 @@ def covid():
         "Russia": "RUS",
         "China": "CHN",
         "USA": "USA",
-        "France": "FRA",
-        "United Kingdom": "GBR"
+        "France": "FRA"
     }
     api_url = "https://covid-api.com/api/reports"
-    current_date = datetime.now().strftime('%Y-%m-%d')
+    target_date = "2023-01-01"
 
     for country_name, iso_code in countries.items():
-        response = requests.get(api_url, params={"iso": iso_code})
+        response = requests.get(api_url, params={"iso": iso_code, "date": target_date})
         if response.status_code == 200 and 'data' in response.json() and len(response.json()['data']) > 0:
-            covid_data = response.json()['data'][0]
+            covid_data = response.json()['data']
             
-            # Sprawdzenie, czy dane dla danego kraju i daty już istnieją
-            existing_data = CovidData.query.filter_by(date=current_date, country=country_name).first()
-            if not existing_data:
+            # Sumuj dane dla wszystkich prowincji
+            total_active_cases = sum([data['active'] for data in covid_data])
+            total_cases = sum([data['confirmed'] for data in covid_data])
+            total_deaths = sum([data['deaths'] for data in covid_data])
+            
+            existing_data = CovidData.query.filter_by(date=target_date, country=country_name).first()
+            if existing_data:
+                existing_data.active_cases = total_active_cases
+                existing_data.total_cases = total_cases
+                existing_data.total_deaths = total_deaths
+            else:
                 new_data = CovidData(
-                    date=current_date,
+                    date=target_date,
                     country=country_name,
-                    active_cases=covid_data['active'],
-                    total_cases=covid_data['confirmed'],
-                    total_deaths=covid_data['deaths']
+                    active_cases=total_active_cases,
+                    total_cases=total_cases,
+                    total_deaths=total_deaths
                 )
                 db.session.add(new_data)
-                db.session.commit()
+            db.session.commit()
     
-    # Pobieranie danych z bazy danych
-    covid_records = CovidData.query.filter_by(date=current_date).all()
+    covid_records = CovidData.query.filter_by(date=target_date).all()
     
-    return render_template('covid.html', covid_records=covid_records)
+    # Generowanie wykresu słupkowego
+    countries = [record.country for record in covid_records]
+    deaths = [record.total_deaths for record in covid_records]
+
+    plt.figure(figsize=(10, 6))
+    plt.bar(countries, deaths, color='red')
+    plt.xlabel('Country')
+    plt.ylabel('Total Deaths')
+    plt.title('COVID-19 Total Deaths on 2023-01-01')
+
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    img.seek(0)
+    plot_url = base64.b64encode(img.getvalue()).decode('utf8')
+    plt.close()
+    
+    return render_template('covid.html', covid_records=covid_records, plot_url=plot_url)
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     
-    # Uruchomienie aplikacji na określonym adresie IP i porcie
     app.run(host='0.0.0.0', port=5000, debug=True)

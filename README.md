@@ -1,12 +1,13 @@
-# My Flask App
+# API Statistics
 
 This Flask application fetches and displays COVID-19 data for selected countries and currency exchange rates for the last month.
 
 ## Features
 
 1. **COVID-19 Data Fetching and Display:**
-   - Fetches the latest COVID-19 data for selected countries (Poland, Germany, Russia, China, USA, France, United Kingdom) using the [COVID-API](https://covid-api.com/api/).
+   - Fetches the latest COVID-19 data for selected countries (Poland, Germany, Russia, China, USA, France) using the [COVID-API](https://covid-api.com/api/).
    - Displays the data in a table format, showing active cases, total cases, and total deaths for each country.
+   - Generates a bar chart showing the total deaths for each country on 2023-01-01.
    - Stores the fetched data in a SQLite database to avoid redundant API calls.
 
 2. **Currency Exchange Rates:**
@@ -19,5 +20,5 @@ This Flask application fetches and displays COVID-19 data for selected countries
 
 1. **Clone the repository:**
    ```sh
-   git clone https://github.com/your-username/your-repo.git
-   cd your-repo
+   git clone https://github.com/Iakirmon/cryptocurrencies.git
+   cd cryptocurrencies

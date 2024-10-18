@@ -1,30 +1,14 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #e0f7fa; /* Jasnoniebieskie tło */
+    background-color: #e0f7fa;
     margin: 0;
     padding: 0;
     display: flex;
     min-height: 100vh;
 }
 
-nav {
-    background-color: #333;
-    color: #fff;
-    padding: 1em;
-    text-align: center;
-    width: 100%;
-    position: fixed;
-    top: 0;
-}
-
-nav a {
-    color: #fff;
-    margin: 0 1em;
-    text-decoration: none;
-}
-
 .container {
-    background-color: #fff; /* Białe tło dla środkowego div */
+    background-color: #fff;
     padding: 2em;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -33,7 +17,7 @@ nav a {
 }
 
 .inner-container {
-    width: 90%; /* Zmniejszenie szerokości o 10% */
+    width: 90%;
     margin: 0 auto;
 }
 
@@ -95,7 +79,7 @@ button:hover {
 }
 
 .chart {
-    width: 48%; /* Pomniejszenie wykresów */
+    width: 48%;
     margin-bottom: 2em;
 }
 
@@ -106,19 +90,16 @@ button:hover {
     border-radius: 4px;
 }
 
-/* Dodanie stylu dla zmniejszenia rozmiaru czcionki dat */
 .chart text {
-    font-size: 0.8em; /* Zmniejszenie rozmiaru czcionki */
+    font-size: 0.8em;
 }
 
-/* Nowa klasa do wyśrodkowania tekstu */
 .centered {
     text-align: center;
     margin: 0 auto;
     display: block;
 }
 
-/* Styl do wyśrodkowania listy i ustawienia jej szerokości na 20% */
 .centered-list {
     list-style-type: disc;
     padding-left: 0;
@@ -132,10 +113,9 @@ button:hover {
     margin-left: 20px;
 }
 
-/* Styl dla panelu bocznego */
 .sidebar {
     height: 100%;
-    width: 250px;
+    width: 80px;
     position: fixed;
     top: 0;
     left: 0;
@@ -144,7 +124,6 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    transition: width 0.3s;
     overflow: hidden;
 }
 
@@ -162,45 +141,27 @@ button:hover {
 }
 
 .sidebar a .icon {
-    margin-right: 10px;
+    font-size: 24px;
 }
 
 .sidebar a:hover {
     background-color: #575757;
 }
 
-.sidebar .icon {
-    font-size: 24px;
+.covid-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 1em;
+    text-align: left;
 }
 
-.sidebar.collapsed {
-    width: 80px;
+.covid-table th, .covid-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
 }
 
-.sidebar.collapsed a {
-    font-size: 16px;
-    justify-content: center;
-}
-
-.sidebar.collapsed .icon {
-    font-size: 20px;
-    margin-right: 0;
-}
-
-.sidebar.collapsed .text {
-    display: none;
-}
-
-.toggle-btn {
-    position: absolute;
-    top: 20px;
-    left: 250px;
-    font-size: 30px;
-    cursor: pointer;
-    color: #333;
-    transition: left 0.3s;
-}
-
-.sidebar.collapsed + .toggle-btn {
-    left: 80px;
+.covid-table th {
+    background-color: #f2f2f2;
+    color: black;
 }
