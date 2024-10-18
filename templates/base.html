@@ -5,17 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask App</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('register') }}">Register</a>
-        <a href="{{ url_for('login') }}">Login</a>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('currencies') }}">Currencies</a> <!-- Dodana zakładka -->
-        {% if current_user.is_authenticated %}
-            <a href="{{ url_for('logout') }}">Logout</a>
-        {% endif %}
-    </nav>
+    <div class="sidebar collapsed" id="sidebar">
+        <a href="{{ url_for('dashboard') }}">
+            <i class="fas fa-home icon"></i>
+            <span class="text">Dashboard</span>
+        </a>
+        <a href="{{ url_for('currencies') }}">
+            <i class="fas fa-coins icon"></i>
+            <span class="text">Currencies</span>
+        </a>
+        <a href="{{ url_for('covid') }}">
+            <i class="fas fa-virus icon"></i>
+            <span class="text">COVID-19</span>
+        </a>
+        <a href="{{ url_for('logout') }}">
+            <i class="fas fa-sign-out-alt icon"></i>
+            <span class="text">Logout</span>
+        </a>
+    </div>
+    <div class="toggle-btn" id="toggle-btn">
+        <i class="fas fa-bars"></i>
+    </div>
     <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -26,5 +39,10 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </div>
+    <script>
+        document.getElementById('toggle-btn').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+    </script>
 </body>
 </html>

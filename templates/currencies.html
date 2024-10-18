@@ -1,21 +1,23 @@
 {% extends "base.html" %}
 {% block content %}
-    <h2>Top 10 Popular Currencies</h2>
-    <form method="POST">
-        <button type="submit">Fetch and Save Currency Data</button>
-    </form>
-    <div class="charts-container">
-        {% for code, plot in plots.items() %}
-            <div class="chart">
-                <h3>{{ code }}</h3>
-                <img src="data:image/png;base64,{{ plot }}" alt="{{ code }} to PLN chart">
-            </div>
-        {% endfor %}
+    <div class="inner-container">
+        <h2>Top 10 Popular Currencies</h2>
+        <form method="POST">
+            <button type="submit">Fetch and Save Currency Data</button>
+        </form>
+        <div class="charts-container">
+            {% for currency in currencies %}
+                <div class="chart">
+                    <h3>{{ currency.code }}</h3>
+                    <img src="data:image/png;base64,{{ plots[currency.code] }}" alt="{{ currency.code }} to PLN chart">
+                </div>
+            {% endfor %}
+        </div>
+        <h2 class="centered">Current Exchange Rates</h2>
+        <ul class="centered-list">
+            {% for currency in currencies %}
+                <li>{{ currency.currency }} ({{ currency.code }}): {{ currency.mid }}</li>
+            {% endfor %}
+        </ul>
     </div>
-    <h2>Current Exchange Rates</h2>
-    <ul>
-        {% for currency in currencies %}
-            <li>{{ currency.currency }} ({{ currency.code }}): {{ currency.mid }}</li>
-        {% endfor %}
-    </ul>
 {% endblock %}

@@ -11,7 +11,7 @@ import base64
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
+app.secret_key = 'your_secret_key'  # Ustawienie secret_key
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -28,6 +28,14 @@ class CurrencyRate(db.Model):
     code = db.Column(db.String(10), nullable=False)
     date = db.Column(db.String(10), nullable=False)
     rate = db.Column(db.Float, nullable=False)
+
+class CovidData(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(10), nullable=False)
+    country = db.Column(db.String(50), nullable=False)
+    active_cases = db.Column(db.Integer, nullable=False)
+    total_cases = db.Column(db.Integer, nullable=False)
+    total_deaths = db.Column(db.Integer, nullable=False)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -117,9 +125,14 @@ def currencies():
                         db.session.add(new_rate)
                 db.session.commit()
         
+        # Sortowanie walut według kursu (od najdroższych do najtańszych)
+        top_10_currencies.sort(key=lambda x: x['mid'], reverse=True)
+
         # Generowanie wykresów
         plots = {}
-        for code, data in historical_data.items():
+        for currency in top_10_currencies:
+            code = currency['code']
+            data = historical_data[code]
             plt.figure(figsize=(5, 3))  # Pomniejszenie wykresów
             plt.plot(data['dates'], data['rates'], marker='o')
             plt.title(f'{code} to PLN (Last 31 Days)')
@@ -138,6 +151,44 @@ def currencies():
         return render_template('currencies.html', currencies=top_10_currencies, plots=plots)
     
     return render_template('currencies.html', currencies=[], plots={})
+
+@app.route('/dashboard/covid', methods=['GET', 'POST'])
+@login_required
+def covid():
+    countries = {
+        "Poland": "POL",
+        "Germany": "DEU",
+        "Russia": "RUS",
+        "China": "CHN",
+        "USA": "USA",
+        "France": "FRA",
+        "United Kingdom": "GBR"
+    }
+    api_url = "https://covid-api.com/api/reports"
+    current_date = datetime.now().strftime('%Y-%m-%d')
+
+    for country_name, iso_code in countries.items():
+        response = requests.get(api_url, params={"iso": iso_code})
+        if response.status_code == 200 and 'data' in response.json() and len(response.json()['data']) > 0:
+            covid_data = response.json()['data'][0]
+            
+            # Sprawdzenie, czy dane dla danego kraju i daty już istnieją
+            existing_data = CovidData.query.filter_by(date=current_date, country=country_name).first()
+            if not existing_data:
+                new_data = CovidData(
+                    date=current_date,
+                    country=country_name,
+                    active_cases=covid_data['active'],
+                    total_cases=covid_data['confirmed'],
+                    total_deaths=covid_data['deaths']
+                )
+                db.session.add(new_data)
+                db.session.commit()
+    
+    # Pobieranie danych z bazy danych
+    covid_records = CovidData.query.filter_by(date=current_date).all()
+    
+    return render_template('covid.html', covid_records=covid_records)
 
 if __name__ == '__main__':
     with app.app_context():

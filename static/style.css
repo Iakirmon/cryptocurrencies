@@ -4,9 +4,6 @@ body {
     margin: 0;
     padding: 0;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
     min-height: 100vh;
 }
 
@@ -32,7 +29,12 @@ nav a {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     width: 80%;
-    margin-top: 5em;
+    margin: 5em auto 0 auto;
+}
+
+.inner-container {
+    width: 90%; /* Zmniejszenie szerokości o 10% */
+    margin: 0 auto;
 }
 
 h2 {
@@ -102,4 +104,103 @@ button:hover {
     height: auto;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+/* Dodanie stylu dla zmniejszenia rozmiaru czcionki dat */
+.chart text {
+    font-size: 0.8em; /* Zmniejszenie rozmiaru czcionki */
+}
+
+/* Nowa klasa do wyśrodkowania tekstu */
+.centered {
+    text-align: center;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Styl do wyśrodkowania listy i ustawienia jej szerokości na 20% */
+.centered-list {
+    list-style-type: disc;
+    padding-left: 0;
+    text-align: left;
+    width: 20%;
+    margin: 0 auto;
+}
+
+.centered-list li {
+    display: list-item;
+    margin-left: 20px;
+}
+
+/* Styl dla panelu bocznego */
+.sidebar {
+    height: 100%;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #333;
+    padding-top: 60px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: width 0.3s;
+    overflow: hidden;
+}
+
+.sidebar a {
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    font-size: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px 0;
+    width: 100%;
+}
+
+.sidebar a .icon {
+    margin-right: 10px;
+}
+
+.sidebar a:hover {
+    background-color: #575757;
+}
+
+.sidebar .icon {
+    font-size: 24px;
+}
+
+.sidebar.collapsed {
+    width: 80px;
+}
+
+.sidebar.collapsed a {
+    font-size: 16px;
+    justify-content: center;
+}
+
+.sidebar.collapsed .icon {
+    font-size: 20px;
+    margin-right: 0;
+}
+
+.sidebar.collapsed .text {
+    display: none;
+}
+
+.toggle-btn {
+    position: absolute;
+    top: 20px;
+    left: 250px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #333;
+    transition: left 0.3s;
+}
+
+.sidebar.collapsed + .toggle-btn {
+    left: 80px;
 }

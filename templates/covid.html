@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>COVID-19 Data for Selected Countries</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Country</th>
+                <th>Active Cases</th>
+                <th>Total Cases</th>
+                <th>Total Deaths</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in covid_records %}
+                <tr>
+                    <td>{{ record.country }}</td>
+                    <td>{{ record.active_cases }}</td>
+                    <td>{{ record.total_cases }}</td>
+                    <td>{{ record.total_deaths }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
